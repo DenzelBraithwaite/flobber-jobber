@@ -1,11 +1,11 @@
 :root {
-  font-family: Roboto, sans-serif;
+  font-family: "Syne Mono", Roboto, sans-serif; // no bold
   line-height: 1;
   font-weight: 400;
   overflow-x: hidden;
 
   color: #444;
-  background-image: url('/board-bg.webp');
+  background-image: url('/forest.webp');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top;
@@ -24,6 +24,11 @@
 
 html,
 body,
+main,
+section,
+aside,
+article,
+pre
 div,
 span,
 button,
@@ -37,8 +42,9 @@ p {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-size: 14px;
 }
 
 body {
-  min-height: 100dvh;
+  height: 100dvh;
 }

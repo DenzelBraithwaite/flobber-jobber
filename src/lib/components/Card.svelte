@@ -7,17 +7,16 @@
 
   // props
   export let faceUp = true;
-  export let displayTitle = 'Title here...';
-  export let title = '';
-  export let img = '/card-bg.png';
+  export let displayTitle = 'Goblin Lord Smasher';
+  export let title = 'Title';
+  export let img = '/xenos/abyssolarian.png';
   export let points = 0;
-  export let race = 'none';
+  export let pointsVisible = false;
+  export let race = 'xeno';
   export let rarity = 'common';
   export let description = '';
   export let trait = '';
   export let traitTitle = '';
-
-  $: if (race === 'goblin-ish') race = 'goblin';
 
   const createEvent = createEventDispatcher();
 
@@ -30,44 +29,40 @@
     })
   }
 
-  function capitalize(string){
-    const firstHalf = string[0].toUpperCase();
-    const secondHalf = string.slice(1);
-    return firstHalf + secondHalf;
-  };
 </script>
 
 {#if !faceUp}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div on:click class="card facedown bottom-deck" in:fly={{x: 100}} out:fade></div>
 {:else}
-<!-- If card is legendary, shows special race colors, otherwise matches race color -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div on:click={cardClickHandler} class="card bg-{race}{rarity === 'legendary' ? '-rare' : ''}" in:fly={{x: 100}} out:fade>
-  <img class="card-img" src={img} alt="img of card">
-  <p class="race {race}-race">{capitalize(race)}</p>
-  <p class="points {race}-race">{points}</p>
-  <p class="card-title {race}-title">{displayTitle}</p>
-  <div class="card-bottom-section">
-    <div class="bottom-section-wrapper">
-      <p class="description">{description}</p>
-      {#if trait}<p class="special-trait">{traitTitle}</p>{/if}
-      <p>{trait}</p>
-    </div>
+  <!-- If card is legendary, shows special race colors, otherwise matches race color -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div on:click={cardClickHandler} class="card bg-{race}{rarity === 'legendary' ? '-rare' : ''}" in:fly={{x: 100}} out:fade>
+    <img class="card-img" src={img} alt="img of card">
+    <!-- <p class="race {race}-race">{race}</p> -->
+    {#if pointsVisible}
+      <p class="points {race}-race">{points}</p>
+    {/if}
+    <span class="card-title-wrapper">
+      <p class="card-title {race}-text-color">{displayTitle}</p>
+    </span>
+    <!-- <div class="card-bottom-section">
+      <div class="bottom-section-wrapper">
+        <p class="description">{description}</p>
+        {#if trait}<p class="special-trait">{traitTitle}</p>{/if}
+        <p>{trait}</p>
+      </div>
+    </div> -->
   </div>
-</div>
 {/if}
 
 <style lang="scss">
   .card {
-    z-index: 0;
     cursor: pointer;
     position: relative;
-    width: 9.5rem;
-    height: 14rem;
-    border-radius: 0.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3882352941);
     transition: all 0.3s ease-out;
+    height: 100%;
+    width: 100%;
 
     display: flex;
     flex-direction: column;
@@ -75,46 +70,50 @@
     justify-content: space-evenly;
 
     &:hover {
-      scale: 1.4;
-      z-index: 2;
+      z-index: 1;
       box-shadow: 0 4px 12px #000000a8;
     }
   }
 
-  .card-bottom-section {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: #ffffff3b;
-    overflow-y: scroll;
-    border-radius: 0.25rem;
-    text-align: center;
-    line-height: 1.125;
+  // .card-bottom-section {
+  //   position: relative;
+  //   width: 100%;
+  //   height: 100%;
+  //   background-color: #ffffff3b;
+  //   overflow-y: scroll;
+  //   border-radius: 0.25rem;
+  //   text-align: center;
+  //   line-height: 1.125;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  //   display: flex;
+  //   flex-direction: column;
+  //   justify-content: center;
+  //   align-items: center;
+  // }
+
+  .card-title-wrapper {
+    background-color: #000000dc;
+    padding: 5px 0 2px;
+    border-radius: 50% 50% 0 0;
+    width: 100%;
+    border-top: 1px solid #000000c9;
+    box-shadow: inset 0 0 8px 0 #0000009f;
+
+    position: absolute;
+    bottom: 0;
   }
 
   .card-title {
     color: #ddd;
-    width: 100%;
-    height: 3rem;
-    text-shadow: 0 2px 8px #000000a8;
-    font-size: 1.25rem;
-    font-weight: bold;
+    text-shadow: 3px 3px 0 #000;
+    font-size: 1.05rem;
+    // font-weight: bold; // no bold with this font
     text-align: center;
-    z-index: 10;
     white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .card-img {
-    height: 45%;
-    width: 100%;
+    width: 85%;
     object-fit: contain;
     object-position: center;
     border-radius: 0.25rem 0.25rem 0 0;
@@ -147,7 +146,7 @@
     max-height: 100%;
     border-radius: 1rem;
     padding: 0.25rem;
-    width: 3.75rem;
+    // width: 3.75rem;
     box-shadow: inset -2px -2px 8px #0000004d;
 
     position: absolute;
@@ -161,26 +160,26 @@
 
   .points {
     color: #eee;
-    z-index: 10;
     text-align: center;
     font-weight: 500;
     font-size: 0.9rem;
     letter-spacing: 1px;
-    height: 1.75rem;
-    width: 1.75rem;
-    border-radius: 0 0 0.75rem 0;
+    height: 20px;
+    width: 32px;
+    border-radius: 0 0 100% 100%;
     box-shadow: inset -2px -2px 8px #0000004d;
+    transform: translateX(50%);
 
     position: absolute;
     top: 0;
-    left: 0;
+    right: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .special-trait {
-    font-weight: bold;
+    // font-weight: bold; // no bold with this font
     color: #fdf3c8;
   }
 
@@ -342,131 +341,54 @@
     border: 2px solid rgb(59 59 59 / 7%);
   }
 
-  /* race title color */
-  .beast-title {
-    background-color: #55431e5e;
+  /* race title text color */
+  .beast-text-color {
+    // background-color: #55431e5e;
+    color: #a37f37;
   }
   
-  .bot-title {
-    background-color: #4242425e;
+  .bot-text-color {
+    // background-color: #4242425e;
+    color: #aaaaaa;
   }
   
-  .dwarf-title {
-    background-color: #774b325e;
+  .dwarf-text-color {
+    // background-color: #774b325e;
+    color: #ca9779;
   }
   
-  .elf-title {
-    background-color: #726b7a5e;
+  .elf-text-color {
+    // background-color: #726b7a5e;
+    color: #a89ab8;
   }
   
-  .goblin-title {
-    background-color: #3277385e;
+  .goblin-text-color {
+    // background-color: #3277385e;
+    color: #77c07d;
   }
   
-  .human-title {
-    background-color: #3242775e;
+  .human-text-color {
+    // background-color: #3242775e;
+    color: #98aae7;
   }
   
-  .xeno-title {
-    background-color: #8e74195e;
+  .xeno-text-color {
+    // background-color: #8e74195e;
+    color: #cab568;
   }
 
-  .boost-title {
-    background-color: #ffffff5e;
+  .boost-text-color {
+    // background-color: #ffffff5e;
+   color: #b4c1da;
   }
 
-  .trap-title {
-    background-color: #0000005e;
+  .trap-text-color {
+    // background-color: #0000005e;
+    color: #830000;
   }
 
-  .neutral-title {
-    background-color: #3b1d4e5e;
-  }
-
-  @media only screen and (max-width: 1100px) {
-    .card {
-      width: 6.5rem;
-      min-width: 6.5rem;
-      height: 9rem;
-      min-height: 9rem;
-    }
-
-    .card-title {
-      height: 1.25rem;
-      font-size: 0.75rem;
-    }
-
-  .bottom-section-wrapper::-webkit-scrollbar,
-    .card-bottom-section::-webkit-scrollbar {
-      background: transparent;
-      width: 0;
-    }
-
-    .bottom-section-wrapper {
-      padding-bottom: 0.9rem;
-      font-size: 0.5rem;
-      padding-top: 0.125rem;
-    }
-
-    .race {
-      font-size: 0.4rem;
-      height: 1rem;
-      padding: 0.125rem;
-      width: 2rem;
-
-      bottom: -0.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .points {
-      font-size: 0.4rem;
-      height: 0.9rem;
-      width: 0.9rem;
-      border-radius: 0 0 0.4rem 0;
-    }
-  }
-
-  @media only screen and (max-width: 800px) {
-    .card {
-      width: 3.5rem;
-      min-width: 3.5rem;
-      height: 6rem;
-      min-height: 6rem;
-    }
-
-    .card-title {
-      height: 1rem;
-      font-size: 0.45rem;
-    }
-
-  .bottom-section-wrapper::-webkit-scrollbar,
-    .card-bottom-section::-webkit-scrollbar {
-      background: transparent;
-      width: 0;
-    }
-
-    .bottom-section-wrapper {
-      padding-bottom: 0.9rem;
-      font-size: 0.5rem;
-      padding-top: 0.125rem;
-    }
-
-    .race {
-      font-size: 0.4rem;
-      height: 1rem;
-      padding: 0.125rem;
-
-      bottom: -0.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .points {
-      font-size: 0.4rem;
-      height: 0.9rem;
-      width: 0.9rem;
-      border-radius: 0 0 0.4rem 0;
-    }
+  .neutral-text-color {
+    // background-color: #3b1d4e5e;
+    color: #af93be;
   }
 </style>
