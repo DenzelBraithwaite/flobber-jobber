@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   // hooks
   import { createEventDispatcher } from 'svelte';
 
@@ -12,7 +12,8 @@
   export let img = '/xenos/abyssolarian.png';
   export let points = 0;
   export let pointsVisible = false;
-  export let race = 'xeno';
+  export let race = ['xeno'];
+  export let bgColor: 'blue' | 'light-blue' | 'green' | 'maroon' | 'grey' | 'silver' | 'black' | 'purple' | 'yellow' | 'brown' = 'blue';
   export let rarity = 'common';
   export let description = '';
   export let trait = '';
@@ -33,11 +34,11 @@
 
 {#if !faceUp}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div on:click class="card facedown bottom-deck" in:fly={{x: 100}} out:fade></div>
+  <div on:click class="card facedown facedown-{race} bottom-deck" in:fly={{x: 100}} out:fade></div>
 {:else}
   <!-- If card is legendary, shows special race colors, otherwise matches race color -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div on:click={cardClickHandler} class="card bg-{race}{rarity === 'legendary' ? '-rare' : ''}" in:fly={{x: 100}} out:fade>
+  <div on:click={cardClickHandler} class="card bg-{bgColor}{rarity === 'legendary' ? '-rare' : ''}" in:fly={{x: 100}} out:fade>
     <img class="card-img" src={img} alt="img of card">
     <!-- <p class="race {race}-race">{race}</p> -->
     {#if pointsVisible}
@@ -65,12 +66,10 @@
     width: 100%;
 
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-evenly;
 
     &:hover {
-      z-index: 1;
       box-shadow: 0 4px 12px #000000a8;
     }
   }
@@ -116,7 +115,8 @@
     width: 85%;
     object-fit: contain;
     object-position: center;
-    border-radius: 0.25rem 0.25rem 0 0;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 16px;
   }
 
   .bottom-section-wrapper::-webkit-scrollbar,
@@ -188,7 +188,6 @@
   }
 
   .facedown {
-    background: url('/card-bg.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -208,84 +207,112 @@
   .flip-180 {
     transform: rotate(0.5turn);
   }
+
+  .facedown-human {
+    background: url('/human-card-back.png');
+  }
+
+  .facedown-goblin {
+    background: url('/goblin-card-back.png');
+  }
+
+  .facedown-elf {
+    background: url('/elf-card-back.png');
+  }
+
+  .facedown-dwarf {
+    background: url('/dwarf-card-back.png');
+  }
+
+  .facedown-bot {
+    background: url('/bot-card-back.png');
+  }
+
+  .facedown-beast {
+    background: url('/beast-card-back.png');
+  }
+
+  .facedown-xeno {
+    background: url('/xeno-card-back.png');
+  }
   
   /* bg color based on race */
-  .bg-beast {
+  .bg-brown {
     background: linear-gradient(to top left, #55431e, #855a2a 50%);
     outline: 4px solid #55431e;
   }
   
-  .bg-beast-rare {
+  .bg-brown-rare {
     background: linear-gradient(to top left, #614d22 5%, #e0de69b6, #855a2a 90%);
     outline: 4px solid #774b32a8;
   }
   
-  .bg-bot {
+  .bg-grey {
     background: linear-gradient(to top left, #424242, #7e7e7e 50%);
     outline: 4px solid #424242;
   }
   
-  .bg-bot-rare {
+  .bg-grey-rare {
     background: linear-gradient(to top left, #424242 5%, #e0de69, #7e7e7e 90%);
     outline: 4px solid #424242;
   }
   
-  .bg-dwarf {
+  .bg-maroon {
     background: linear-gradient(to top left, #774b32, #c07369 50%);
     outline: 4px solid #774b32a8;
   }
   
-  .bg-dwarf-rare {
+  .bg-maroon-rare {
     background: linear-gradient(to top left, #774b32 5%, #e0de69, #c07369 90%);
     outline: 4px solid #774b32a8;
   }
   
-  .bg-elf {
+  .bg-silver {
     background: linear-gradient(to top left, #726b7a, #ddceee 50%);
     outline: 4px solid #726b7a;
   }
   
-  .bg-elf-rare {
+  .bg-silver-rare {
     background: linear-gradient(to top left, #726b7a 5%, #e0de69, #ddceee 90%);
     outline: 4px solid #726b7a;
   }
   
-  .bg-goblin {
+  .bg-green {
     background: linear-gradient(to top left, #327738, #78c069 50%);
     outline: 4px solid #327738a8;
   }
   
-  .bg-goblin-rare {
+  .bg-green-rare {
     background: linear-gradient(to top left, #327738 5%, #e0de69, #78c069 90%);
     outline: 4px solid #327738a8;
   }
   
-  .bg-human {
+  .bg-blue {
     background: linear-gradient(to top left, #324277, #69c0ad 50%);
     outline: 4px solid #324277a8;
   }
 
-  .bg-human-rare {
+  .bg-blue-rare {
     background: linear-gradient(to top left, #324277 5%, #e0de69, #69c0ad 90%);
     outline: 4px solid #324277a8;
   }
 
-  .bg-xeno {
+  .bg-yellow {
     background: linear-gradient(to top left,#776832,#c2a84c 50%);
     outline: 4px solid #957c1e;
   }
 
-  .bg-boost {
+  .bg-light-blue {
     background: linear-gradient(353deg, #90beff, #8bc8d13d 50%);
     outline: 4px solid #eeeeeed4;
   }
 
-  .bg-trap {
+  .bg-black {
     background: linear-gradient(353deg, #000000, #ffffff4a 50%);
     outline: 4px solid #111111;
   }
 
-  .bg-neutral {
+  .bg-purple {
     background: linear-gradient(353deg,#31273e,rgb(147 60 233 / 16%) 50%);
     outline: 4px solid #3d1f5a;
 }

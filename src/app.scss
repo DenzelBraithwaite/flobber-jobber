@@ -22,13 +22,27 @@
   width: 0;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  
+  &::before {
+    box-sizing: border-box;
+  }
+  
+  &::after {
+    box-sizing: border-box;
+  }
+}
+
 html,
 body,
 main,
 section,
 aside,
 article,
-pre
+pre,
 div,
 span,
 button,
@@ -41,7 +55,6 @@ a,
 p {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
   font-size: 14px;
 }
 
