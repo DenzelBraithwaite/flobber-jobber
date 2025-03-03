@@ -6,28 +6,28 @@
   import { fade } from 'svelte/transition';
 
   // Stores
-  import { player1, player2, masterDeck } from '../stores';
+  import { player1, player2, enemyPlayer } from '../../stores/players';
+  import { colorsDeck, deckDescription } from '../../stores/decks';
 
   // Dialogues
-  import { tutorialDialogue } from '../dialogues';
+  import { tutorialDialogue } from '../../dialogues';
 
-  // Custom components
-  import { Card, Spinner } from './index';
+  // Components
+  import { BlankCard } from '../gameCards';
+  import Card from '../Card.svelte';
 
-  // Websocket
-  // import { io } from 'socket.io-client';
-
-  // let socket = io('http://192.168.2.10:6912'); // Thanos
-  // let socket = io('http://192.168.2.21:6912'); // MacBook
   let showSpinner = false;
-  let rows = 4;
-  let cols = 7;
+  let gameInSession = false;
+  let currentRound = 1;
+  let currentBoardTemperature: 'cool' | 'warm' | 'hot' = 'warm';
   let pointsVisible = false;
   let dialogueTextString = 'CLICK NEXT TO START THE GAME.';
-  let playerCards = [$masterDeck.xenoDeck['xenoGuard'], $masterDeck.dwarfDeck['blacksmith'], $masterDeck.goblinDeck['bokoblin'], $masterDeck.elfDeck['darkElf'], $masterDeck.beastDeck['fox'], $masterDeck.botDeck['incuBot'], $masterDeck.humanDeck['soldier']];
-
+  let rows = 4;
+  let cols = 7;
   $: totalSquares = rows * cols;
 
+
+  
   onMount(() => {
     // Handles connects
     // socket.on('connect', () => console.log(`User ID: ${socket.id} connected!`));
@@ -54,6 +54,7 @@
 
     // Resets game and updates player hands
     // socket.on('game-started', data => {});
+    startGame();
   });
 
   // Ends current round
@@ -63,11 +64,13 @@
   // Resets values to restart the game.
   function resetGame(): void {
   }
-  
+
   // Initiaties a new round
   function startGame(): void {
     // Send data to websocket server
     // socket.emit('start-game', {player1: $player1, player2: $player2});
+    dealCards('p1');
+    dealCards('e1');
   }
 
   // Determine if it is the player's turn or not
@@ -88,39 +91,68 @@
     console.log('player card clicked!');
   }
 
+  function enemyCardClicked(): void {
+    console.log('player card clicked!');
+  }
+
   function gameBoardSquareClicked(): void {
     console.log('Square clicked!');
   }
 
+  function dealCards(playerID): void {
+    let handDealt = [];
+    for (let i = 0; i < 7; i++) {
+      const nextCardIndex = Math.floor(Math.random() * colorsDeck.length);
+      const cardDrawn = colorsDeck[nextCardIndex];
+      handDealt.push($deckDescription[cardDrawn]);
+      colorsDeck.splice(nextCardIndex, 1);
+    }
+
+    if (playerID === 'p1') {
+      player1.update($player1 => {
+        $player1.hand = handDealt;
+        return $player1;
+      });
+    } else if (playerID === 'e1') {
+      enemyPlayer.update($enemyPlayer => {
+        $enemyPlayer.hand = handDealt;
+        return $enemyPlayer;
+      });
+    }
+  }
+
+  function drawCard(): void {
+    const nextCardIndex = Math.floor(Math.random() * colorsDeck.length);
+    const cardDrawn = colorsDeck[nextCardIndex];
+    const newCard = cardDrawn;
+    colorsDeck.splice(nextCardIndex, 1);
+
+    return newCard;
+  }
+
+  function centerBoardClicked(): void {
+    const temps = ['cool', 'warm', 'hot'];
+    const randomNum = Math.floor(Math.random() * 3);
+    currentBoardTemperature = temps[randomNum] as 'cool' | 'warm' | 'hot';
+  }
 </script>
 
 <main>
-  {#if showSpinner}
-    <Spinner />
-  {/if}
-
-  <div class="game-area">
-    <div class="game-dialogue">
-      <div class="game-dialogue-text-wrapper">
-        <p>{dialogueTextString}</p>
-      </div>
-      <button class="dialogue-next-btn">NEXT</button>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div class="game-board">
+    <div class="game-field">
+      {#each $enemyPlayer.hand as card, i (i)}
+        <div on:click={enemyCardClicked} class="board-square r1c{i + 1}">
+          <BlankCard bgColor={card.bgColor} isRare={card.isRare} temperature={card.temperature} faceUp={false}/>
+        </div>
+      {/each}
+      <div on:click={centerBoardClicked} class="center-board-square center-board-square-bg__{currentBoardTemperature}"></div> 
+      {#each $player1.hand as card, i (i)}
+        <div on:click={playerCardClicked} class="board-square r3c{i + 1}">
+          <BlankCard bgColor={card.bgColor} isRare={card.isRare} temperature={card.temperature}/>
+        </div>
+      {/each}
     </div>
-
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="game-board">
-      <div class="game-field">
-        {#each playerCards as card, i (i)}
-          <div on:click={playerCardClicked} class="board-square r4c{i + 1}">
-            <Card displayTitle={card.displayTitle} img={card.image} race={card.race} bgColor={card.bgColor} points={card.points} {pointsVisible}/>
-          </div>
-        {/each}
-        {#each Array(totalSquares - playerCards.length) as square, i (i)}
-          <div on:click={gameBoardSquareClicked} class="board-square"></div> 
-        {/each}
-      </div>
-    </div>
-
   </div>
 </main>
 
@@ -143,7 +175,8 @@
   main {
     position: relative;
     width: 100%;
-    height: 100vh;
+    // height: 100vh;
+    height: 100%;
     overflow: visible;
   }
   
@@ -166,70 +199,10 @@
     gap: 18px;
   }
 
-  .game-dialogue {
-    position: relative;
-    background-color: rgba(7, 20, 37, 0.835);
-    color: #fff3cb;
-    box-shadow: 0 4px 20px #000000, inset 0 0 12px 10px #00000046;
-    border: 6px double #c5ac5991;
-    border-radius: 10px;
-    padding: 10px;
-    height: 100%;
-    width: 100%;
-  }
-
-  .game-dialogue-text-wrapper {
-    width: 90%;
-    height: 100%;
-    overflow-y: scroll;
-    
-    &::-webkit-scrollbar {
-      width: 0;
-    }
-    
-    p {
-      font-size: 1.75rem;
-    }
-  }
-
-  .dialogue-next-btn {
-    cursor: pointer;
-    font-size: 1.125rem;
-    padding: 6px 10px;
-    border-radius: 4px 50% 50% 4px;
-    letter-spacing: 1px;
-    background-color: #c5ac59;
-    color: #eee;
-    box-shadow: 0 4px #6e5f2b;
-    border: none;
-    transition: 0.1s all ease-in-out;
-    
-    position: absolute;
-    bottom: 12px;
-    right: 8px;
-    
-    &:hover {
-      background-color: #b89e4c;
-      box-shadow: 0 2px #6e5f2b;
-      transform: translateY(2px); 
-    }
-
-    &:active {
-      background-color: #b89e4c;
-      box-shadow: 0 1px #6e5f2b;
-      transform: translateY(4px);
-    }
-  }
-
   .game-board {
     position: relative;
     height: 100%;
     width: 100%;
-    border-radius: 10px;
-    background-color: rgba(7, 20, 37, 0.835);
-    box-shadow: 0 4px 20px #000000, inset 0 0 12px 10px #0000008e;
-    border: 6px double #c5ac5991;
-    overflow: scroll;
   }
   
   .game-field {
@@ -240,7 +213,7 @@
     padding: 12px;
 
     display: grid;
-    grid-template: 2fr repeat(2, 1fr) 2fr / repeat(7, 1fr);
+    grid-template: 1fr 1fr 1fr / repeat(7, 1fr);
     gap: 6px;
   }
 
@@ -251,7 +224,8 @@
     box-shadow: inset 0 0 8px 0 #0000009f;
     border-radius: 20px;
     overflow: hidden;
-    transition: scale 0.2s ease-out;
+    transition: border 0.2s ease-in-out;
+
 
     display: flex;
     justify-content: center;
@@ -259,8 +233,41 @@
     
     &:hover {
       background-color: #b69e5142;
-      border: 4px solid #968652;
+      border: 2px solid #968652;
     }
+  }
+  
+  .center-board-square {
+    position: relative;
+    background: linear-gradient(to top left, #32427762, #32773862, #ddceee62, #c0736962, #7e7e7e62, #855a2a62, #c2a84c62);
+    border: 2px solid rgba(0, 0, 0, 0.664);
+    box-shadow: inset 0 0 8px 0 #0000009f;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: scale 0.2s ease-out;
+    grid-column: span 7;
+    grid-row: 2;
+    transition: border 0.2s ease-in-out;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    &:hover {
+      border: 2px solid #968652;
+    }
+  }
+
+  .center-board-square-bg__hot {
+    background: linear-gradient(to top left,#720e0e, #d32929);
+  }
+
+  .center-board-square-bg__warm {
+    background: linear-gradient(to top left,#2c2315, #916a45);
+  }
+
+  .center-board-square-bg__cool {
+    background: linear-gradient(to top left,#192255, #305770);
   }
 
   /* Utility */
@@ -300,7 +307,7 @@
     color: #8e7419;
   }
 
-  // First row, cols 1-7
+  // First row (enemy), cols 1-7
   .r1c1 {
     grid-area: 1 / 1;
   }
@@ -329,36 +336,7 @@
     grid-area: 1 / 7;
   }
 
-  // Second row, cols 1-7
-  .r2c1 {
-    grid-area: 2 / 1;
-  }
-
-  .r2c2 {
-    grid-area: 2 / 2;
-  }
-
-  .r2c3 {
-    grid-area: 2 / 3;
-  }
-
-  .r2c4 {
-    grid-area: 2 / 4;
-  }
-
-  .r2c5 {
-    grid-area: 2 / 5;
-  }
-
-  .r2c6 {
-    grid-area: 2 / 6;
-  }
-
-  .r2c7 {
-    grid-area: 2 / 7;
-  }
-
-  // Third row, cols 1-7
+  // Third row (player), cols 1-7
   .r3c1 {
     grid-area: 3 / 1;
   }
@@ -385,33 +363,5 @@
 
   .r3c7 {
     grid-area: 3 / 7;
-  }
-
-  .r4c1 {
-    grid-area: 4 / 1;
-  }
-
-  .r4c2 {
-    grid-area: 4 / 2;
-  }
-
-  .r4c3 {
-    grid-area: 4 / 3;
-  }
-
-  .r4c4 {
-    grid-area: 4 / 4;
-  }
-
-  .r4c5 {
-    grid-area: 4 / 5;
-  }
-
-  .r4c6 {
-    grid-area: 4 / 6;
-  }
-
-  .r4c7 {
-    grid-area: 4 / 7;
   }
 </style>

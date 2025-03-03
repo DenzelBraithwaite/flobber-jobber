@@ -22,7 +22,7 @@ type RaceDeck = {
   [raceName: string]: RaceCard; // { [key(can be any valid identifier): KeyType(js converts to string automatically)]: ValueType }
 }
 
-const masterDeck = writable<RaceDeck>({
+const mainDeck = writable<RaceDeck>({
   humanDeck: {
     emperor: {
       id: 'human-1',
@@ -1063,4 +1063,4 @@ const masterDeck = writable<RaceDeck>({
   }
 });
 
-export default masterDeck;
+export default mainDeck;

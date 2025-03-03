@@ -1,13 +1,10 @@
 <script lang="ts">
-    // Plugins
-    // import { Link } from 'svelte-routing';
-        
-    // Other custom components
-    import Game from '../lib/components/Game.svelte';
+    // Components
+    import { MainGame } from '../lib/components/index';
   </script>
   
   <main>
-      <Game />
+      <MainGame />
   </main>
   
   <style>
